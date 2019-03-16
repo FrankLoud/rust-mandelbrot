@@ -9,12 +9,10 @@ fn main() {
 fn parse_pair<T: FromStr>(s: &str, separator: char) -> Option<(T, T)> {
     match s.find(separator) {
         None => None,
-        Some(index) => {
-            match (T::from_str(&s[..index]), T::from_str(&s[index + 1..])) {
-                (Ok(left), Ok(right)) => Some((left, right)),
-                _ => None
-            }
-        }
+        Some(index) => match (T::from_str(&s[..index]), T::from_str(&s[index + 1..])) {
+            (Ok(left), Ok(right)) => Some((left, right)),
+            _ => None,
+        },
     }
 }
 
@@ -28,13 +26,16 @@ fn test_parse_pair() {
 fn parse_complex(s: &str) -> Option<Complex<f64>> {
     match parse_pair(s, ',') {
         None => None,
-        Some((re, im)) => Some(Complex { re, im })
+        Some((re, im)) => Some(Complex { re, im }),
     }
 }
 
 #[test]
 fn test_parse_complex() {
-    assert_eq!(parse_complex("12,13.5"), Some(Complex { re: 12.0, im: 13.5 }));
+    assert_eq!(
+        parse_complex("12,13.5"),
+        Some(Complex { re: 12.0, im: 13.5 })
+    );
 }
 
 fn escape_time(c: Complex<f64>, limit: u32) -> Option<u32> {
@@ -54,5 +55,5 @@ fn escape_time(c: Complex<f64>, limit: u32) -> Option<u32> {
 fn test_escape_time() {
     assert_eq!(escape_time(Complex { re: 3.0, im: 4.0 }, 255), Some(0));
     assert_eq!(escape_time(Complex { re: 0.1, im: 0.8 }, 255), Some(5));
-    assert_eq!(escape_time(Complex { re: 0.1, im: 0.8 }, 3),   None);
+    assert_eq!(escape_time(Complex { re: 0.1, im: 0.8 }, 3), None);
 }
