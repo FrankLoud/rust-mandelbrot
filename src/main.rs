@@ -57,3 +57,51 @@ fn test_escape_time() {
     assert_eq!(escape_time(Complex { re: 0.1, im: 0.8 }, 255), Some(5));
     assert_eq!(escape_time(Complex { re: 0.1, im: 0.8 }, 3), None);
 }
+
+fn pixel_to_point(
+    bounds: (usize, usize),
+    pixel: (usize, usize),
+    upper_left: Complex<f64>,
+    lower_right: Complex<f64>,
+) -> Complex<f64> {
+    let width = lower_right.re - upper_left.re;
+    let height = upper_left.im - lower_right.im;
+
+    Complex {
+        re: upper_left.re + (pixel.0 as f64 / bounds.0 as f64) * width,
+        im: upper_left.im - (pixel.1 as f64 / bounds.1 as f64) * height,
+    }
+}
+
+#[test]
+fn test_pixel_to_point() {
+    assert_eq!(
+        pixel_to_point(
+            (200, 100),
+            (0, 0),
+            Complex { re: 0.0, im: 1.0 },
+            Complex { re: 1.0, im: 0.0 }
+        ),
+        Complex { re: 0.0, im: 1.0 }
+    );
+
+    assert_eq!(
+        pixel_to_point(
+            (200, 100),
+            (0, 0),
+            Complex { re: 1.0, im: 2.0 },
+            Complex { re: 2.0, im: 1.0 }
+        ),
+        Complex { re: 1.0, im: 2.0 }
+    );
+
+    assert_eq!(
+        pixel_to_point(
+            (200, 100),
+            (50, 50),
+            Complex { re: 1.0, im: 2.0 },
+            Complex { re: 2.0, im: 1.0 }
+        ),
+        Complex { re: 1.25, im: 1.5 }
+    );
+}
