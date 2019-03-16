@@ -105,3 +105,22 @@ fn test_pixel_to_point() {
         Complex { re: 1.25, im: 1.5 }
     );
 }
+
+fn render(
+    buffer: &mut [u8],
+    bounds: (usize, usize),
+    upper_left: Complex<f64>,
+    lower_right: Complex<f64>,
+) {
+    assert!(buffer.len() == bounds.0 * bounds.1);
+
+    for i in 0..bounds.0 {
+        for j in 0..bounds.1 {
+            let point = pixel_to_point(bounds, (i, j), upper_left, lower_right);
+            buffer[i * bounds.1 + j] = match escape_time(point, 255) {
+                Some(n) => 255 - n as u8,
+                None => 0,
+            }
+        }
+    }
+}
