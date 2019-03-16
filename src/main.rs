@@ -5,10 +5,35 @@ use image::png::PNGEncoder;
 use image::ColorType;
 use num::Complex;
 use std::fs::File;
+use std::io::Write;
 use std::str::FromStr;
 
-fn main() {
-    println!("Hello, world!");
+fn main() -> Result<(), Box<std::error::Error>> {
+    let args: Vec<String> = std::env::args().collect();
+
+    if args.len() != 5 {
+        writeln!(
+            std::io::stderr(),
+            "Usage: mandelbrot FILE PIXELS UPPERLEFT LOWERRIGHT"
+        )?;
+        writeln!(
+            std::io::stderr(),
+            "Example: {} mandel.png 1000x750 -1.2,0.35 -1,0.2",
+            args[0]
+        )?;
+        std::process::exit(1);
+    }
+
+    let bounds = parse_pair(&args[2], 'x').expect("Error parsing pixel bounds");
+    let upper_left = parse_complex(&args[3]).expect("Error parsing upper left corner");
+    let lower_right = parse_complex(&args[4]).expect("Error parsing lower right corner");
+
+    let mut pixels = vec![0; bounds.0 * bounds.1];
+
+    render(&mut pixels, bounds, upper_left, lower_right);
+    write_image(&args[1], &pixels, bounds).expect("Error writing image file");
+
+    Ok(())
 }
 
 fn parse_pair<T: FromStr>(s: &str, separator: char) -> Option<(T, T)> {
@@ -119,10 +144,10 @@ fn render(
 ) {
     assert!(buffer.len() == bounds.0 * bounds.1);
 
-    for i in 0..bounds.0 {
-        for j in 0..bounds.1 {
+    for i in 0..bounds.1 {
+        for j in 0..bounds.0 {
             let point = pixel_to_point(bounds, (i, j), upper_left, lower_right);
-            buffer[i * bounds.1 + j] = match escape_time(point, 255) {
+            buffer[i * bounds.0 + j] = match escape_time(point, 255) {
                 Some(n) => 255 - n as u8,
                 None => 0,
             }
