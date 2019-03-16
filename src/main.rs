@@ -25,6 +25,18 @@ fn test_parse_pair() {
     assert_eq!(parse_pair("1.5,2", ','), Some((1.5, 2.0)));
 }
 
+fn parse_complex(s: &str) -> Option<Complex<f64>> {
+    match parse_pair(s, ',') {
+        None => None,
+        Some((re, im)) => Some(Complex { re, im })
+    }
+}
+
+#[test]
+fn test_parse_complex() {
+    assert_eq!(parse_complex("12,13.5"), Some(Complex { re: 12.0, im: 13.5 }));
+}
+
 fn escape_time(c: Complex<f64>, limit: u32) -> Option<u32> {
     let mut z = Complex { re: 0.0, im: 0.0 };
 
